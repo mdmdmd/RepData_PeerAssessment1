@@ -8,7 +8,7 @@ The dataset, activity.csv was taken from https://d396qusza40orc.cloudfront.net/r
 
 
 ```r
-setwd("C:/Coursera/ReproducibleResearch")
+setwd("C:/Coursera/RepData_PeerAssessment1")
 activity <- read.csv("activity.csv")
 ```
 Pre Process the data - convert dates to usable format
@@ -33,7 +33,7 @@ summary(activity)
 ##  NA's   :2304
 ```
 
-The total number of steps taken per day
+###The total number of steps taken per day
 
 ```r
 TotalDaily <- aggregate(steps ~ date,activity,sum)
@@ -140,17 +140,7 @@ plot(DailyAverage,type='l')
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9-1.png) 
 
-The 5 minute interval with the highest average number of steps
-
-```r
-max(DailyAverage$steps, na.rm = TRUE)
-```
-
-```
-## [1] 206.1698
-```
-
-The interval with the highest average number of steps
+###The 5 minute interval with the highest average number of steps
 
 ```r
 DailyAverage[order(DailyAverage$steps,decreasing=T)[1],]
@@ -163,7 +153,7 @@ DailyAverage[order(DailyAverage$steps,decreasing=T)[1],]
 
 ##Imputing missing values
 
-The total number of missing values
+###The total number of missing values
 
 ```r
 missing<-subset(activity,is.na(activity$steps))
@@ -182,21 +172,24 @@ aggregate(missing$steps, by=list(missing$date), FUN=function(x){NROW(x)})
 ## 8 2012-11-30 288
 ```
 
-Impute missing values by substituting for the average of the corresponding interval
+###Impute missing values
+Impute missing values by substituting missing value with the average from the corresponding intervals of actual values
+Create new dataframe: with.imputed which will contain missing values
 
 ```r
 with.imputed<-activity
 with.imputed$steps[is.na(with.imputed$steps)] <- DailyAverage$steps[is.na(with.imputed$steps)]
 ```
 
-Histogram of total daily including imputed values
+###Histogram of total daily steps including imputed values
+Adding the imputed values increases the number of average days in the middle of the distribution
 
 ```r
 TotalDaily.with.imputed <- aggregate(steps ~ date,with.imputed,sum)
 hist(TotalDaily.with.imputed$steps)
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png) 
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
 
 ###The mean number of steps taken each day including imputed values is:
 
@@ -217,7 +210,10 @@ median(TotalDaily.with.imputed$steps)
 ```
 ## [1] 10765.59
 ```
+The mean and median have not been significantly influenced by the imputed values
 
+##Activity pattern differences between weekdays and weekends.
+###Create new column in dataframe with a factor signifying the day type
 
 ```r
 activity$weekday <- as.POSIXlt(activity$date)$wday
@@ -234,12 +230,12 @@ str(activity)
 ##  $ wday    : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
 ```
 
+###
 
 ```r
 DailyAverage.bywday <-aggregate(steps ~ interval+wday, activity,mean)
-
 library(lattice)
 xyplot(steps ~ interval|wday, data=DailyAverage.bywday, type='l', layout=c(1,2)  )
 ```
 
-![plot of chunk unnamed-chunk-18](figure/unnamed-chunk-18-1.png) 
+![plot of chunk unnamed-chunk-17](figure/unnamed-chunk-17-1.png) 
