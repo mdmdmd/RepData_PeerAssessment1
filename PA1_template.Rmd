@@ -19,7 +19,7 @@ Summary of the data
 summary(activity)
 ```
 
-The total number of steps taken per day
+###The total number of steps taken per day
 ```{r, echo=TRUE}
 TotalDaily <- aggregate(steps ~ date,activity,sum)
 TotalDaily
@@ -51,31 +51,29 @@ DailyAverage <-aggregate(steps ~ interval, activity,mean)
 plot(DailyAverage,type='l')
 ```
 
-The 5 minute interval with the highest average number of steps
-```{r, echo=TRUE}
-max(DailyAverage$steps, na.rm = TRUE)
-```
-
-The interval with the highest average number of steps
+###The 5 minute interval with the highest average number of steps
 ```{r, echo=TRUE}
 DailyAverage[order(DailyAverage$steps,decreasing=T)[1],]
 ```
 
 ##Imputing missing values
 
-The total number of missing values
+###The total number of missing values
 ```{r,echo=TRUE}
 missing<-subset(activity,is.na(activity$steps))
 aggregate(missing$steps, by=list(missing$date), FUN=function(x){NROW(x)})
 ```
 
-Impute missing values by substituting for the average of the corresponding interval
+###Impute missing values
+Impute missing values by substituting missing value with the average from the corresponding intervals of actual values
+Create new dataframe: with.imputed which will contain missing values
 ```{r, echo=TRUE}
 with.imputed<-activity
 with.imputed$steps[is.na(with.imputed$steps)] <- DailyAverage$steps[is.na(with.imputed$steps)]
 ```
 
-Histogram of total daily including imputed values
+###Histogram of total daily steps including imputed values
+Adding the imputed values increases the number of average days in the middle of the distribution
 ```{r, echo=TRUE}
 TotalDaily.with.imputed <- aggregate(steps ~ date,with.imputed,sum)
 hist(TotalDaily.with.imputed$steps)
@@ -90,16 +88,19 @@ mean(TotalDaily.with.imputed$steps)
 ```{r, echo=TRUE}
 median(TotalDaily.with.imputed$steps)
 ```
+The mean and median have not been significantly influenced by the imputed values
 
+##Activity pattern differences between weekdays and weekends.
+###Create new column in dataframe with a factor signifying the day type
 ```{r, echo=TRUE}
 activity$weekday <- as.POSIXlt(activity$date)$wday
 activity$wday <- as.factor(ifelse(activity$weekday == 6,"weekend",ifelse(activity$weekday == 0,"weekend", "weekday")))
 str(activity)
 ```
 
+###
 ```{r, echo=TRUE}
 DailyAverage.bywday <-aggregate(steps ~ interval+wday, activity,mean)
-
 library(lattice)
 xyplot(steps ~ interval|wday, data=DailyAverage.bywday, type='l', layout=c(1,2)  )
 ```
